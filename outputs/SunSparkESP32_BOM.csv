@@ -1,0 +1,31 @@
+Id,Designator,Footprint,Quantity,Designation,Manufacturer,Comment,Mouser #
+1,"R6,R7",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2,22R,,Generic 0805,
+2,"R19,R18,R3",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,3,20k,,Generic 0805,
+3,"Q2,Q1",SOT-23,2,IRLML6244TRPBF,IRLML6244TRPBF,,942-IRLML6244TRPBF 
+4,L1,L_Coilcraft_LPS4018,1,22µ,LPS4018-223MRC,,994-LPS4018-223MRC 
+5,U1,LFCSP-16-1EP_3x3mm_P0.5mm_EP1.7x1.7mm,1,ADP5090ACP,ADP5090ACPZ-2-R7,,584-ADP5090ACPZ-2-R7 
+6,"C4,C1",C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,2,10n,C0805X103K2RAC3316 ,low ESR and leakage type,80-C0805X103K2R3316 
+7,R14,R_0612_1632Metric,1,6R8,3430B2F6R8TDF,"generic, but needs >1.5W",279-3430B2F6R8TDF 
+8,"R12,R11",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2,3.92M,,Generic 0805,
+9,"R17,R1",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2,13M,,Generic 0805,
+10,C6,CP_Elec_5x3,1,47µ,865080242004,,710-865080242004 
+11,"TP3,TP4,TP2,TP1",TestPoint_Pad_D1.0mm,4,TestPoint,,Generic 0805,
+12,R9,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,1,5.23M,,Generic 0805,
+13,"C8,C11,C7",C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,3,100n,,Generic 0805,
+14,R8,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,1,4.87M,,Generic 0805,
+15,U3,ESP32-S2-MINI-1,1,ESP32-S2-MINI-1,ESP32-S2-MINI-1-N4,,356-ESP32-S2-MINI-1 
+16,"SW2,SW1",SW_Tactile_SPST_NO_Straight_CK_PTS636Sx25SMTRLFS,2,SW_Push,PTS636 SM25J SMTR LFS,,611-PTS636SM25JSMTRL 
+17,R15,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,1,10k,,Generic 0805,
+18,J2,USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal,1,USB_C_Receptacle_USB2.0,USB4105-GF-A ,,640-USB4105-GF-A 
+19,"J5,J3",PinSocket_1x03_P2.54mm_Vertical,2,Conn_01x03_Pin,,generic pin header,
+20,"R5,R4",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2,5.1k,,Generic 0805,
+21,"C9,C10",C_1206_3216Metric,2,22µ,C3216JB1C226M160AB,low ESR,810-C3216JB1C226M16B 
+22,JP1,SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm,1,SolderJumper_2_Open,,generic,
+23,"C5,C2",CP_Elec_4x3,2,4.7µ,865080640004,,710-865080640004 
+24,J1,PinSocket_1x02_P2.54mm_Vertical,1,Conn_01x02_Pin,,generic pin header,
+25,"R10,R13",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2,6.04M,,Generic 0805,
+26,"J4,J6",PinSocket_1x15_P2.54mm_Vertical,2,Conn_01x15_Pin,,generic pin header,
+27,U2,SOT-223-3_TabPin2,1,AMS1117-3.3,AZ1117CH2-3.3TRG1,,621-AZ1117CH2-33TRG1 
+28,R16,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,1,1.4M,,Generic 0805,
+29,C3,CP_Radial_D10.0mm_P5.00mm,1,50F,VMF506M3R8 ,"Must tolerate 3.6V, 30..50F is ok",598-VMF506M3R8 
+30,R2,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,1,6.34M,,Generic 0805,
