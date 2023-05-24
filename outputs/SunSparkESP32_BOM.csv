@@ -21,7 +21,7 @@ Id,Designator,Footprint,Quantity,Designation,Manufacturer,Comment,Mouser #
 20,"R5,R4",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2,5.1k,,Generic 0805,
 21,"C9,C10",C_1206_3216Metric,2,22µ,C3216JB1C226M160AB,low ESR,810-C3216JB1C226M16B 
 22,JP1,SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm,1,SolderJumper_2_Open,,generic,
-23,"C5,C2",CP_Elec_4x3,2,4.7µ,865080640004,,710-865080640004 
+23,"C5,C2",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2,4.7µ,C2012X5R1C475M085AB,"low ESR, Generic 0805",810-C2012X5R1C475M0B
 24,J1,PinSocket_1x02_P2.54mm_Vertical,1,Conn_01x02_Pin,,generic pin header,
 25,"R10,R13",R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2,6.04M,,Generic 0805,
 26,"J4,J6",PinSocket_1x15_P2.54mm_Vertical,2,Conn_01x15_Pin,,generic pin header,
