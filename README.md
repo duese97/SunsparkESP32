@@ -3,7 +3,7 @@ A new ESP32 hardware platform for low power applications.
 
 This PCB utilizes a small solar cell in order to harvest energy and store it in a supercapacitor.
 
-![image info](doc\V2\pcb_render.PNG)
+![image info](doc/V2/pcb_render.PNG)
 
 ## Features
 1. ESP32 S2 Mini module with a single core MCU: Most projects utilize one core anyway or don't benefit much form a second one. So no current is wasted by idling unnecessary.
