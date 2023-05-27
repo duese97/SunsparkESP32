@@ -29,3 +29,5 @@ Id,Designator,Footprint,Quantity,Designation,Manufacturer,Comment,Mouser #
 28,R16,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,1,1.4M,,Generic 0805,
 29,C3,CP_Radial_D10.0mm_P5.00mm,1,50F,VMF506M3R8 ,"Must tolerate 3.6V, 30..50F is ok",598-VMF506M3R8 
 30,R2,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,1,6.34M,,Generic 0805,
+31,U4,HOPERF_RFM9XW_SMD,1,RFM96W-433S2,,optional,
+32,D1,D_SOD-323,1,D_Schottky,RSX051VYM30FHTR ,Any 0.5A Schottky will do it,755-RSX051VYM30FHTR
