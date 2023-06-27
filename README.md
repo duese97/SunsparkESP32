@@ -9,7 +9,7 @@ This PCB utilizes a small solar cell in order to harvest energy and store it in 
 1. ESP32 S2 Mini module with a single core MCU: Most projects utilize one core anyway or don't benefit much form a second one. So no current is wasted by idling unnecessary.
 2. Native USB support: Converter for RS232 can be connected externally. Many USB to RS232 transceivers have a high quiescent consumption. They are mostly needed for debugging, in order to show data to a console. Flashing the chip also works via the USB bootloader (and is also faster).
 3. Integrated open drain MOSFET: Control high power external peripherals and turn them off when not needed.
-4. Recharging the supercap can also be done via VBUS from USB. Solder jumper can be set to permanently power module via USB OR via a backup battery (change of threshold resistors might be required).
+4. VBUS from USB utilized automatically as backup supply, so debugging does not drain the supercap.
 5. Optional RF95/96/97/98 LoRa module can be added.
 
 ## Requirements for external components
