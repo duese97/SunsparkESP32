@@ -1952,6 +1952,7 @@
     )
   )
 
+
   (junction (at 212.09 154.94) (diameter 0) (color 0 0 0 0)
     (uuid 0116319e-9b68-4e42-9c94-d3119567ea6f)
   )
@@ -2976,8 +2977,8 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 36638a88-3a51-4d81-98a9-03d1875408fb)
   )
-  (text "Dimensioned as follows:\n300µA average current, needs to\nbe supplied for 12h (during night)\nU(0)=3.5V -> U(12h)=3.1V\nAt least ~32F"
-    (at 106.68 52.07 0)
+  (text "Dimensioned as follows:\n300µA average current, needs to\nbe supplied for 12h (during night)\nU(0)=3.5V -> U(12h)=3.1V\nAt least ~32F\n\nPowerstage must tolerate 100mA for ~200ms\nCurrent spikes 300mA for 1ms\nR_ESR + R_SYS + R_BAT + R_PGOOD =\n0.2 + 0.48 + 0.55 + 0.02 = 1.25Ohm"
+    (at 106.68 45.72 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 390cd28d-82d3-43ca-b458-52fa70a72d40)
   )

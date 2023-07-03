@@ -21,10 +21,19 @@ This PCB utilizes a small solar cell in order to harvest energy and store it in 
 1. USB VCOM for bootloader not working -> GND from USB and GND1 from ESP differ?
 2. BOOT button only working when Supercap is sufficiently charged?
 3. Linear 3V3 regulator instantly produced some magic smoke upon connecting VBUS from USB :)
+4. VREF for ADP5090 is too low and not constant
+
+
+## Charging estimation
+### V2 board
+In direct sunlight: ~40mA, in the shade with average cloudiness: 2mA.
 
 ## Current consumption estimation
 General testing consists of the board being flashed with a WiFi UDP client.It posts ~50B of data every 10 minutes to a Node RED UDP server. Static IP config is utilized, to avoid waiting for the DHCP.
 Active time is about 0.5s, while sleeping the rest of the time.
+The challenge are the short current bursts when the WiFi peripheral is actively used:
+![image info](doc/V2/CurrentActive0R2_Shunt.PNG)
+
 Values for estimating discharging of capacitor:
 ### V2 board
 Acitve: 45mA; Sleep: 10µA; 50µA average
