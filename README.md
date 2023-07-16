@@ -3,7 +3,7 @@ A new ESP32 hardware platform for low power applications.
 
 This PCB utilizes a small solar cell in order to harvest energy and store it in a supercapacitor.
 
-![image info](doc/V2/pcb_render.PNG)
+![image info](doc/pcb_render.PNG)
 
 ## Features
 1. ESP32 S2 Mini module with a single core MCU: Most projects utilize one core anyway or don't benefit much form a second one. So no current is wasted by idling unnecessary.
@@ -17,7 +17,7 @@ I included some FW which realizes a simple WiFI weather station with a common BM
 
 Shutting down/entering deepsleep immediately after sending the UDP packet seems not to work (underlying RTOS or network stack takes some time). Thus I additionally set up the the UDP Server in a way that it sends a small sting back, upon receiving data.
 The provided code does not utilizes this any further, but it could be a nice way for a two way communication. The ESP32 will run 1s at most, an then enter sleep again:
-![image info](doc/V2/nodeRed_setup.PNG)
+![image info](doc/nodeRed_setup.PNG)
 
 There is also some small logic, which handles a depletion (or charging) of the supercap by altering the deepsleep period.
 
@@ -47,7 +47,7 @@ In direct sunlight: ~40mA, in the shade with average cloudiness: 2mA.
 General testing consists of the board being flashed with a WiFi UDP client. It posts ~50B of data every 10 minutes to a Node RED UDP server. Static IP config is utilized, to avoid waiting for the DHCP.
 Active time is about 0.5s, while sleeping the rest of the time.
 The challenge are the short current bursts when the WiFi peripheral is actively used:
-![image info](doc/V2/CurrentActive0R2_Shunt.PNG)
+![image info](doc/CurrentActive0R2_Shunt.PNG)
 
 Values for estimating discharging of capacitor:
 ### V2 board
