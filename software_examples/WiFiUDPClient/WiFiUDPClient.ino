@@ -11,7 +11,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
-#include "esp32s2/rom/rtc.h"
+#include "esp32s2/rom/rtc.h"  // for reset reason etc.
+#include "esp32/clk.h"
 
 /* Pins where UART pin header is routed */
 #define RXD0              40
@@ -23,6 +24,7 @@
 #define SECONDS_PER_MIN   60
 #define MIN_PER_HOUR      60
 #define uS_TO_S_FACTOR    1000000
+#define mS_TO_S_FACTOR    1000
 
 /* Constants which influence wakup and sleep behaviour */
 #define MIN_SLEEP_TIME    SECONDS_PER_MIN*10              // Time ESP32 will go to sleep (in seconds)
@@ -38,7 +40,11 @@
 #define PIN_ADC           1                               // where midpoint of divider is connected
 
 // only need to use (and waste) ebergy when debugging
-#define custom_println(s) if(use_debug_mode){customSerial.println(s);}
+#define custom_println(...)         if(use_debug_mode)                                            \
+                                    {                                                             \
+                                      snprintf(print_buffer, sizeof(print_buffer), __VA_ARGS__);  \
+                                      customSerial.println(print_buffer);                         \
+                                    }
 
 /* values for statemachine */
 enum
@@ -70,8 +76,10 @@ WiFiUDP Udp; //The Udp library class
 
 /* State machine */
 uint32_t millis_start, active_time;
-volatile uint8_t curr_state = STATE_SENSOR_READ; // default state, init only set if 
-bool use_debug_mode = false; // flag for easily debugging code via prints :)
+RTC_DATA_ATTR uint32_t last_active;               // to measure entire cycle, can be outputted upon next connect
+RTC_DATA_ATTR float last_delta_v;                 // to measure entire cycle, can be outputted upon next connect
+volatile uint8_t curr_state = STATE_SENSOR_READ;  // default state, init only set if 
+bool use_debug_mode = false;                      // flag for easily debugging code via prints :)
 
 float supercap_voltage; // supercap voltage in V
 RTC_DATA_ATTR uint32_t timeToSleepSeconds = MIN_SLEEP_TIME; // sleep time, stored in RTC RAM to also take past operation into account
@@ -85,6 +93,8 @@ RTC_DATA_ATTR uint32_t timeToSleepSeconds = MIN_SLEEP_TIME; // sleep time, store
 RTC_DATA_ATTR Adafruit_BME280 bme; // I2C
 float temp, humi, press;
 
+/* Print buffer for easily formatting */
+char print_buffer[256];
 
 HardwareSerial customSerial(0);
 
@@ -93,28 +103,38 @@ void connectToWiFi(const char * ssid, const char * pwd);
 void WiFiEvent(WiFiEvent_t event);
 
 
-
 // wrapper enter deepsleep
 static void enter_deepsleep(void)
 {
-  custom_println("Entering sleep");
-  custom_println(active_time);
+  custom_println("%s", "Entering sleep");
+  last_active = active_time;
+  uint64_t sleepUs = timeToSleepSeconds*uS_TO_S_FACTOR - active_time*mS_TO_S_FACTOR;
 
-  esp_sleep_enable_timer_wakeup(timeToSleepSeconds*uS_TO_S_FACTOR);
+  // take delay due to active time into account, to compensate for runtime
+  esp_sleep_enable_timer_wakeup(sleepUs);
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
   esp_deep_sleep_start();
+}
+
+static float measure_adc(void)
+{
+  float value;
+
+  pinMode(PIN_R_DIV, OUTPUT); // use pin to briefly drive voltage divider
+  digitalWrite(PIN_R_DIV, HIGH);
+
+  analogSetAttenuation(ADC_11db);
+  value = (analogReadMilliVolts(PIN_ADC)/1000.0)*2; // read voltage, is double that what we read
+
+  digitalWrite(PIN_R_DIV, LOW); // reset output so no current is drawn anymore
+
+  return value;
 }
 
 // determines next sleep period and stores it in RTC RAM
 static void calc_next_sleep(void)
 {
-  pinMode(PIN_R_DIV, OUTPUT); // use pin to briefly drive voltage divider
-  digitalWrite(PIN_R_DIV, HIGH);
-
-  analogSetAttenuation(ADC_11db);
-  supercap_voltage = (analogReadMilliVolts(PIN_ADC)/1000.0)*2; // read voltage, is double that what we read
-
-  digitalWrite(PIN_R_DIV, LOW); // reset output so no current is drawn anymore
+  supercap_voltage = measure_adc();
 
   /* Logic to determine next wakeup, depending on supercap charge */
   if (use_debug_mode)
@@ -140,12 +160,11 @@ static void calc_next_sleep(void)
     // double sleep period to save more energy
     timeToSleepSeconds *= 2;
   }
-  else
+  else // we are already waiting with the maximum possible period
   {
-    // we are already waiting with the maximum possible period
+    timeToSleepSeconds = MAX_SLEEP_TIME; // make sure to reset it to a proper value
   }
-  custom_println("Chose sleep period:");
-  custom_println(timeToSleepSeconds);
+  custom_println("Chose sleep period: %ld", timeToSleepSeconds);
 }
 
 void setup()
@@ -156,9 +175,8 @@ void setup()
 
   // Initialize hardware serial
   customSerial.begin(115200, SERIAL_8N1, RXD0, TXD0);
-  custom_println("SunsparkESP32 start, reset reason:");
+  custom_println("SunsparkESP32 start, reset reason: %d", reason); // output reset reason
 
-  custom_println(reason); // output reset reason
   switch (reason) // depending on 
   {
     case RTCWDT_BROWN_OUT_RESET: // when brownout was active: don't continue, save energy
@@ -185,6 +203,7 @@ void loop()
   do
   {
     active_time = millis() - millis_start;       // calculate wifi active time
+    bool state_changed = false;
 
     switch(curr_state)
     {
@@ -192,9 +211,9 @@ void loop()
         if (bme.init()) // success
         {
           curr_state = STATE_SENSOR_READ;
+          state_changed = true;
 
           custom_println("BME280 found");
-          custom_println(active_time);
           break;
         }
         else
@@ -214,13 +233,13 @@ void loop()
         if (bme.takeForcedMeasurement())
         {
           curr_state = STATE_WIFI_INIT;
+          state_changed = true;
 
           temp  = bme.readTemperature();
           press = bme.readPressure() / 100.0F;
           humi  = bme.readHumidity();
 
           custom_println("Sensor read done");
-          custom_println(active_time);
           break;
         }
         else
@@ -232,6 +251,8 @@ void loop()
 
       case STATE_WIFI_INIT: //Connect to the WiFi network
         curr_state = STATE_WIFI_WAIT;
+        state_changed = true;
+
         connectToWiFi(networkName, networkPswd);
         break;
 
@@ -240,23 +261,48 @@ void loop()
         break;
 
       case STATE_SEND: //Send a packet
-        curr_state = STATE_WAIT_ACK;
+      {
+        /* Approximate length in worst case:
+         * 6 keys with quotation marks, colon         = 6 * 4   = 24
+         * 5 comma separators                         = 5 * 1   =  5
+         * 2 floats with 3 digits + point + 2 digits  = 2 * 6   = 12
+         * 1 float with 2 digits + point + 2 digits   = 1 * 5   =  5
+         * 1 float with 1 digits + point + 2 digits   = 1 * 4   =  4
+         * 1 float with 4 digits + point + 0 digits   = 1 * 5   =  5
+         * 2 integers with 10 digits max              = 2 * 10  = 20
+         * terminator                                 = 1 * 1   =  1
+         *
+         * sum                                                  = 76
+         * 
+         * some padding :-) for furture use -> 256
+         */
+        char txBuffer[256];
 
+        curr_state = STATE_WAIT_ACK;
+        state_changed = true;
+
+        // move data into buffer for sending and possible later evaluation
+        snprintf(txBuffer, sizeof(txBuffer),
+                "{\"T\":%2.2f,\"P\":%3.2f,\"H\":%3.2f,\"L\":%lu,\"B\":%1.2f,\"D\":%lu,\"V\":%4.0f}",
+                temp,
+                press,
+                humi,
+                last_active,
+                supercap_voltage,
+                timeToSleepSeconds,
+                last_delta_v
+        );
+
+        /* hand over to network stack */
         Udp.begin(udpListenPort);
         Udp.beginPacket(udpAddress, udpSendPort);
-        Udp.printf("{\"T\":%.2f,\"P\":%.2f,\"H\":%.2f,\"L\":%lu,\"B\":%.2f,\"D\":%lu}",
-                    temp,
-                    press,
-                    humi,
-                    active_time,
-                    supercap_voltage,
-                    timeToSleepSeconds);
+        Udp.printf("%s",txBuffer);
         Udp.endPacket();
 
-        custom_println("Transmitted");
-        custom_println(active_time);
+        /* Print message contents for simple debugging */
+        custom_println("Sent: %s", txBuffer);
         break;
-
+      }
       case STATE_WAIT_ACK:
         if (Udp.parsePacket()) // received something
         {
@@ -268,13 +314,11 @@ void loop()
             packetBuffer[len] = 0;
           }
 
-          /* Parse received contents of server here, if desired */
-          custom_println("Received");
-          custom_println(active_time);
-          custom_println("Contents:");
-          custom_println(packetBuffer);
+          /* Parse received contents of server here, if desired */          
+          custom_println("Received contents: %s", packetBuffer);
 
           curr_state = STATE_SLEEP;
+          state_changed = true;
         }
         else
         {
@@ -284,7 +328,13 @@ void loop()
 
       default:
         curr_state = STATE_SLEEP;
+        state_changed = true;
         break;
+    }
+
+    if (state_changed)
+    {
+      custom_println("Active time: %lu, CPU freq: %lu", active_time, esp_clk_cpu_freq());
     }
 
     if (curr_state == STATE_SLEEP)
@@ -295,11 +345,15 @@ void loop()
   } while(active_time < MAX_WAKEUP_MS);
 
   /* Come here if either success or if timed out */
+  last_delta_v = (supercap_voltage - measure_adc())*1000; // calculate how much voltage dropped during operation
+  custom_println("mV consumed: %f", last_delta_v);
+
+  /* Prepare to sleep again */
   enter_deepsleep();
 }
 
 void connectToWiFi(const char * ssid, const char * pwd){
-  custom_println("Connecting to WiFi network: " + String(ssid));
+  custom_println("Connecting to WiFi network: %s", ssid);
 
   // delete old config
   WiFi.disconnect(true);
@@ -325,8 +379,8 @@ void WiFiEvent(WiFiEvent_t event){
     switch(event)
     {
       case ARDUINO_EVENT_WIFI_STA_GOT_IP: //When connected set           
-        custom_println("WiFi connected! IP address: ");
-        custom_println(WiFi.localIP());  
+        custom_println("WiFi connected! IP address: %s", WiFi.localIP().toString().c_str());
+        
         //initializes the UDP state -> This initializes the transfer buffer
         Udp.begin(WiFi.localIP(),udpListenPort);
         curr_state = STATE_SEND;
