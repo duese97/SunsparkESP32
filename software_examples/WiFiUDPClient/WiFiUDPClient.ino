@@ -36,7 +36,7 @@
 /* Supercap related */
 #define CAP_FULL_LVL      3.4                             // if this or higher is read, then supercap is definetly full
 #define CAP_NORMAL_LVL    3.3                             // voltage threshold above which normal operation can take place
-#define PIN_R_DIV         2                               // pin which powers voltage divider for ADC
+#define PIN_R_DIV         17                              // pin which powers voltage divider for ADC
 #define PIN_ADC           1                               // where midpoint of divider is connected
 
 // only need to use (and waste) ebergy when debugging
@@ -108,7 +108,7 @@ static void enter_deepsleep(void)
 {
   custom_println("%s", "Entering sleep");
   last_active = active_time;
-  uint64_t sleepUs = timeToSleepSeconds*uS_TO_S_FACTOR - active_time*mS_TO_S_FACTOR;
+  uint64_t sleepUs = timeToSleepSeconds * uS_TO_S_FACTOR - active_time * mS_TO_S_FACTOR;
 
   // take delay due to active time into account, to compensate for runtime
   esp_sleep_enable_timer_wakeup(sleepUs);
@@ -164,13 +164,13 @@ static void calc_next_sleep(void)
   {
     timeToSleepSeconds = MAX_SLEEP_TIME; // make sure to reset it to a proper value
   }
-  custom_println("Chose sleep period: %ld", timeToSleepSeconds);
+  custom_println("Chose sleep period: %lds", timeToSleepSeconds);
 }
 
 void setup()
 {
   RESET_REASON reason = rtc_get_reset_reason(0); // check why we woke up
-  pinMode(DEBUG_PIN, INPUT);
+  pinMode(DEBUG_PIN, INPUT_PULLDOWN);
   use_debug_mode = digitalRead(DEBUG_PIN);
 
   // Initialize hardware serial
